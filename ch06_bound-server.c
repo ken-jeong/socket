@@ -1,6 +1,7 @@
-// ���� ���α׷�.
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
+// Setup Program
 #define _CRT_SECURE_NO_WARNINGS
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,35 +9,40 @@
 #pragma comment(lib, "Ws2_32.lib")
 
 #define BUF_SIZE 30
+
 void ErrorHandling(char *message);
 
-int main()
-{
+int main() {
 	WSADATA wsaData;
-	SOCKET servSock;
-	char message[BUF_SIZE];
-	int strLen;
-	int clntAdrSz;
-	
-	SOCKADDR_IN servAdr, clntAdr;
-	
-	if(WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+	if(WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
 		ErrorHandling("WSAStartup() error!"); 
-	
-	servSock = socket(PF_INET, SOCK_DGRAM, 0);
-	if(servSock == INVALID_SOCKET)
+	}
+
+	// ================================================== //
+	// 1. socket(): 서버 소켓 생성
+	// ================================================== //
+	SOCKET servSock = socket(PF_INET, SOCK_DGRAM, 0);
+	if(servSock == INVALID_SOCKET) {
 		ErrorHandling("UDP socket creation error");
+	}
 	
+	// ================================================== //
+	// 2. bind(): 서버 소켓에 주소 할당
+	// ================================================== //
+	SOCKADDR_IN servAdr, clntAdr;
 	memset(&servAdr, 0, sizeof(servAdr));
 	servAdr.sin_family=AF_INET;
 	servAdr.sin_addr.s_addr = htonl(INADDR_ANY);
 	servAdr.sin_port = htons(9000);
-	
-	if(bind(servSock, (SOCKADDR*)&servAdr, sizeof(servAdr)) == SOCKET_ERROR)
+	if(bind(servSock, (SOCKADDR*)&servAdr, sizeof(servAdr)) == SOCKET_ERROR) {
 		ErrorHandling("bind() error");
-	
-	while(1) 
-	{		
+	}
+
+	int clntAdrSz;
+	int strLen;
+	char message[BUF_SIZE];
+
+	while(1) {		
 		clntAdrSz = sizeof(clntAdr);
 		strLen = recvfrom(servSock, message, BUF_SIZE, 0, (SOCKADDR*)&clntAdr, &clntAdrSz);
 
@@ -66,8 +72,7 @@ int main()
 	return 0;
 }
 
-void ErrorHandling(char *message)
-{
+void ErrorHandling(char *message) {
 	fputs(message, stderr);
 	fputc('\n', stderr);
 	exit(1);
