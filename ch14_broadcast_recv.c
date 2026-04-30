@@ -1,3 +1,4 @@
+// cl ch14_broadcast_recv.c /link ws2_32.lib
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
 
@@ -5,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <winsock2.h>
-#include <ws2tcpip.h> // for struct ip_mreq
+#include <ws2tcpip.h>
 #pragma comment(lib, "Ws2_32.lib")
 
 #define BUF_SIZE 30
@@ -29,14 +30,7 @@ int main(void) {
 
 	bind(hRecvSock, (SOCKADDR*)&Addr, sizeof(Addr));
 	
-	// 2. 멀티캐스트 주소 수신하도록 설정하기: 소켓 옵션 사용
-	struct ip_mreq joinAddr;
-	joinAddr.im_multiaddr.s_addr = inet_addr("224.1.1.2"); // Class D Multicast Address
-	joinAddr.im_interface.s_addr = htonl(INADDR_ANY); // IP 주소 알아서 설정
-	
-	setsockopt(hRecvSock, IPPROTO_IP, IP_ADD_MEMBERSHIP, (void*)&joinAddr, sizeof(joinAddr));
-	
-	// 3. 반복적으로 수신하기 -> 수신 여부 확인
+	// 2. 반복적으로 수신하기 -> 수신 여부 확인
 	char buf[BUF_SIZE];
 
 	while (1) {
